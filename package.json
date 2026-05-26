@@ -11,6 +11,13 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^7.8.0",
+    "@tsparticles/interaction-external-pause": "^4.0.5",
+    "@tsparticles/interaction-particles-attract": "^4.0.5",
+    "@tsparticles/move-parallax": "^3.9.1",
+    "@tsparticles/plugin-easing-quad": "^4.0.5",
+    "@tsparticles/shape-line": "^4.0.5",
+    "@tsparticles/shape-square": "^4.0.5",
+    "@tsparticles/updater-color": "^3.9.1",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",

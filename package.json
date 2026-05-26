@@ -6,41 +6,36 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "@prisma/client": "^7.8.0",
-    "@tsparticles/interaction-external-pause": "^4.0.5",
-    "@tsparticles/interaction-particles-attract": "^4.0.5",
-    "@tsparticles/move-parallax": "^3.9.1",
-    "@tsparticles/plugin-easing-quad": "^4.0.5",
-    "@tsparticles/shape-line": "^4.0.5",
-    "@tsparticles/shape-square": "^4.0.5",
-    "@tsparticles/updater-color": "^3.9.1",
-    "framer-motion": "^12.40.0",
-    "lucide-react": "^1.16.0",
     "next": "16.2.6",
-    "openai": "^6.39.0",
-    "prisma": "^7.8.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+
+    "@google/generative-ai": "^0.24.1",
+    "@prisma/client": "^7.8.0",
+    "prisma": "^7.8.0",
+
+    "openai": "^6.39.0",
+
+    "framer-motion": "^12.40.0",
+    "lucide-react": "^1.16.0",
+
     "react-markdown": "^10.1.0",
-    "react-syntax-highlighter": "^16.1.1",
-    "react-tsparticles": "^2.12.2",
     "remark-gfm": "^4.0.1",
-    "tsparticles": "^4.0.5",
-    "tsparticles-slim": "^2.12.0"
+    "react-syntax-highlighter": "^16.1.1",
+
+    "@tsparticles/react": "^3.0.0",
+    "@tsparticles/engine": "^3.0.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-syntax-highlighter": "^15.5.13",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.6",
-    "tailwindcss": "^4",
     "typescript": "^5"
   }
 }

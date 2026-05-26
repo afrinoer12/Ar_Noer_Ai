@@ -1,15 +1,8 @@
 import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 
-const groq = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: "https://api.groq.com/openai/v1",
-});
-
 const createTitle = (message: string) => {
-  const cleanTitle = message
-    .replace(/\s+/g, " ")
-    .trim();
+  const cleanTitle = message.replace(/\s+/g, " ").trim();
 
   if (cleanTitle.length > 35) {
     return cleanTitle.slice(0, 35) + "...";
@@ -42,6 +35,25 @@ Rules:
 
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.GROQ_API_KEY;
+
+    if (!apiKey) {
+      return Response.json(
+        {
+          reply:
+            "GROQ_API_KEY belum diatur di Vercel Environment Variables.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    const groq = new OpenAI({
+      apiKey,
+      baseURL: "https://api.groq.com/openai/v1",
+    });
+
     const body = await req.json();
 
     const message = body.message;
@@ -55,7 +67,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // Jika belum ada conversation, buat baru
     if (!conversationId) {
       const newConversation = await prisma.conversation.create({
         data: {
@@ -66,7 +77,6 @@ export async function POST(req: Request) {
       conversationId = newConversation.id;
     }
 
-    // Simpan pesan user ke database
     await prisma.chat.create({
       data: {
         role: "user",
@@ -75,7 +85,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // Ambil history chat dalam conversation ini
     const history = await prisma.chat.findMany({
       where: {
         conversationId,
@@ -85,21 +94,16 @@ export async function POST(req: Request) {
       },
     });
 
-    // Format history untuk AI
-    const messages = history.map(
-      (chat: {
-        role: string;
-        message: string;
-      }) => ({
-        role: chat.role as "user" | "assistant",
-        content: chat.message,
-      })
-    );
+    const messages = history.map((chat) => ({
+      role:
+        chat.role === "user"
+          ? ("user" as const)
+          : ("assistant" as const),
+      content: chat.message,
+    }));
 
-    // Kirim ke Groq AI
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
-
       messages: [
         {
           role: "system",
@@ -107,7 +111,6 @@ export async function POST(req: Request) {
         },
         ...messages,
       ],
-
       temperature: 0.7,
       max_tokens: 1500,
     });
@@ -115,7 +118,6 @@ export async function POST(req: Request) {
     const aiReply =
       completion.choices[0].message.content || "";
 
-    // Simpan jawaban AI ke database
     await prisma.chat.create({
       data: {
         role: "assistant",
@@ -124,7 +126,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // Kirim balasan ke frontend
     return Response.json({
       reply: aiReply,
       conversationId,

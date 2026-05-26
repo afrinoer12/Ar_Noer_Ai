@@ -1,6 +1,9 @@
 import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 const createTitle = (message: string) => {
   const cleanTitle = message.replace(/\s+/g, " ").trim();
 

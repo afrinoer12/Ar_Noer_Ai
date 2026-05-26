@@ -1,20 +1,37 @@
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+
 import { prisma } from "@/lib/prisma";
 import { createAuthToken } from "@/lib/auth";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const name = body.name?.trim();
-    const email = body.email?.trim().toLowerCase();
-    const password = body.password;
+    const name = String(body.name || "").trim();
+    const email = String(body.email || "").trim().toLowerCase();
+    const password = String(body.password || "");
 
     if (!email || !password) {
       return Response.json(
         {
+          success: false,
           error: "Email dan password wajib diisi.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    if (!email.includes("@")) {
+      return Response.json(
+        {
+          success: false,
+          error: "Format email tidak valid.",
         },
         {
           status: 400,
@@ -25,6 +42,7 @@ export async function POST(req: Request) {
     if (password.length < 6) {
       return Response.json(
         {
+          success: false,
           error: "Password minimal 6 karakter.",
         },
         {
@@ -42,6 +60,7 @@ export async function POST(req: Request) {
     if (existingUser) {
       return Response.json(
         {
+          success: false,
           error: "Email sudah terdaftar.",
         },
         {
@@ -82,6 +101,7 @@ export async function POST(req: Request) {
 
     return Response.json({
       success: true,
+      message: "Register berhasil.",
       user,
     });
   } catch (error) {
@@ -89,7 +109,9 @@ export async function POST(req: Request) {
 
     return Response.json(
       {
-        error: "Register gagal.",
+        success: false,
+        error:
+          "Register gagal. Cek database, environment variable, atau Prisma di server.",
       },
       {
         status: 500,

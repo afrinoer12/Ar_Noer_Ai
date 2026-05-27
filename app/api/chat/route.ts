@@ -59,7 +59,7 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    const message = body.message;
+    const message = String(body.message || "");
     const mode = body.mode || "chatbot";
 
     let conversationId = body.conversationId;
@@ -70,40 +70,69 @@ export async function POST(req: Request) {
       });
     }
 
-    if (!conversationId) {
-      const newConversation = await prisma.conversation.create({
+    let databaseAvailable = true;
+
+    let messages: {
+      role: "user" | "assistant";
+      content: string;
+    }[] = [
+      {
+        role: "user",
+        content: message,
+      },
+    ];
+
+    try {
+      if (!conversationId) {
+        const newConversation = await prisma.conversation.create({
+          data: {
+            title: createTitle(message),
+          },
+        });
+
+        conversationId = newConversation.id;
+      }
+
+      await prisma.chat.create({
         data: {
-          title: createTitle(message),
+          role: "user",
+          message,
+          conversationId,
         },
       });
 
-      conversationId = newConversation.id;
+      const history = await prisma.chat.findMany({
+        where: {
+          conversationId,
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+      });
+
+      messages = history.map((chat) => ({
+        role:
+          chat.role === "user"
+            ? ("user" as const)
+            : ("assistant" as const),
+        content: chat.message,
+      }));
+    } catch (dbError) {
+      console.log(
+        "DATABASE ERROR, CONTINUE WITHOUT HISTORY:",
+        dbError
+      );
+
+      databaseAvailable = false;
+      conversationId = null;
+
+      messages = [
+        {
+          role: "user",
+          content: message,
+        },
+      ];
     }
-
-    await prisma.chat.create({
-      data: {
-        role: "user",
-        message,
-        conversationId,
-      },
-    });
-
-    const history = await prisma.chat.findMany({
-      where: {
-        conversationId,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-    });
-
-    const messages = history.map((chat) => ({
-      role:
-        chat.role === "user"
-          ? ("user" as const)
-          : ("assistant" as const),
-      content: chat.message,
-    }));
 
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
@@ -121,17 +150,24 @@ export async function POST(req: Request) {
     const aiReply =
       completion.choices[0].message.content || "";
 
-    await prisma.chat.create({
-      data: {
-        role: "assistant",
-        message: aiReply,
-        conversationId,
-      },
-    });
+    if (databaseAvailable && conversationId) {
+      try {
+        await prisma.chat.create({
+          data: {
+            role: "assistant",
+            message: aiReply,
+            conversationId,
+          },
+        });
+      } catch (dbError) {
+        console.log("FAILED TO SAVE AI REPLY:", dbError);
+      }
+    }
 
     return Response.json({
       reply: aiReply,
       conversationId,
+      saved: databaseAvailable,
     });
   } catch (error) {
     console.log("CHAT API ERROR:", error);

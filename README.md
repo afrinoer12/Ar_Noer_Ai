@@ -33,12 +33,7 @@ Project ini cocok untuk:
 | ✨ AI Generator Mode | ✅ Active |
 | 📚 AI Summary Mode | ✅ Active |
 | 📅 AI Scheduler Mode | ✅ Active |
-| 💬 Chat History | ✅ Active |
-| 🔍 Search Recent Chats | ✅ Active |
-| 🗑️ Delete Chat | ✅ Active |
-| 🧹 Clear All Chats | ✅ Active |
 | 📊 Dashboard Stats | ✅ Active |
-| 🔐 Login & Register UI | ✅ Available |
 | 📱 Responsive Design | ✅ Mobile Ready |
 | ⚡ Cyberpunk Animation | ✅ Active |
 | 🌐 Vercel Deployment | ✅ Ready |
